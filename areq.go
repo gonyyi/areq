@@ -12,14 +12,15 @@ import (
 )
 
 var globalReq = NewRequest()
+
 func Req(method string, url string, options ...*Option) error {
 	return globalReq.Req(method, url, options...)
 }
 
 type Option struct {
-	Req func(*http.Request) error
-	Cli func(cli *http.Client) error
-	Res func(r *http.Response) error
+	Req   func(*http.Request) error
+	Cli   func(cli *http.Client) error
+	Res   func(r *http.Response) error
 }
 
 type Request struct {
@@ -54,6 +55,8 @@ func (r *Request) Req(method string, url string, options ...*Option) error {
 	if err != nil {
 		return err
 	}
+	// if close the connection after the request such when there are tons of diff servers to send few req.
+	// req.Close = true
 
 	for _, v := range options {
 		if v.Req != nil {
@@ -69,10 +72,13 @@ func (r *Request) Req(method string, url string, options ...*Option) error {
 	}
 
 	res, err := r.Client.Do(req)
+	// if body.Close is after the error check, when redirect, res won't be nil.
+	if res != nil {
+		defer res.Body.Close()
+	}
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
 
 	for _, v := range options {
 		if v.Res != nil {
