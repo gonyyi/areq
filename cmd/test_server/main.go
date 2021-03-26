@@ -20,7 +20,7 @@ func main() {
 			println("------DUMP BEGIN------")
 			println(string(out)+"\n")
 		}
-		w.Write([]byte("ok"))
+		w.Write([]byte(`{"status":"ok"}`))
 	})
 
 	http.ListenAndServe(":8080", nil)
