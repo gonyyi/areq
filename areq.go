@@ -12,6 +12,7 @@ import (
 	"time"
 )
 
+const VERSION = "areq/0.1.1"
 
 type Request struct {
 	Client    *http.Client
