@@ -3,10 +3,6 @@
 
 package areq
 
-const (
-	VERSION = "areq/0.1.1"
-)
-
 // Err is a simple error format compatible as a string
 type Err string
 
