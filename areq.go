@@ -41,7 +41,7 @@ func NewRequest() *Request {
 	return &r
 }
 
-func (r *Request) Req(method string, url string, options ...*DoFn) error {
+func (r Request) Req(method string, url string, options ...*DoFn) error {
 	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
 		return err
