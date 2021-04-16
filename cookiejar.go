@@ -80,6 +80,13 @@ func (j *CookieJar) List() []string {
 	return urls
 }
 
+func (j *CookieJar) AddCookie(u *url.URL, name string, value string) {
+	j.lk.Lock()
+	j.cookies[u.Host] = []*http.Cookie{
+		{Name: name, Value: value},
+	}
+}
+
 func (j *CookieJar) SetCookies(u *url.URL, cookies []*http.Cookie) {
 	j.lk.Lock()
 	j.cookies[u.Host] = cookies
