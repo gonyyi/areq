@@ -1,3 +1,5 @@
+// (c) 2021 Gon Y Yi. https://gonyyi.com
+
 package areq
 
 import (
