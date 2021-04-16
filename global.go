@@ -1,7 +1,9 @@
+// (c) 2021 Gon Y Yi. https://gonyyi.com
+
 package areq
 
 const (
-	VERSION = "areq/0.1"
+	VERSION = "areq/0.1.1"
 )
 
 // Err is a simple error format compatible as a string
