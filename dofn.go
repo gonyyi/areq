@@ -16,16 +16,16 @@ type DoFn struct {
 	Res func(r *http.Response) error
 }
 
-var Do dofns
-
-type dofns struct{}
-
-func (dofns) If(condition bool, do *DoFn) *DoFn {
+func DoIf(condition bool, do *DoFn) *DoFn {
 	if condition {
 		return do
 	}
 	return nil
 }
+
+var Do dofns
+
+type dofns struct{}
 
 func (dofns) AuthBasic(id, pwd string) *DoFn {
 	return &DoFn{
