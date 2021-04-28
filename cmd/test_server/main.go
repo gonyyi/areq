@@ -11,6 +11,7 @@ import (
 	"strings"
 )
 
+var NAME = []byte("aReq.Tester 0.2.0 (github.com/gonyyi/areq)\n\n")
 const VERSION = "0.2.0"
 
 func main() {
@@ -87,6 +88,7 @@ func main() {
 			log.Info().Str("ip", r.RemoteAddr).Str("uri", r.RequestURI).Write()
 		}
 		w.WriteHeader(200)
+		w.Write(NAME)
 		w.Write([]byte("URI: " + lastURI + "\nIP:  " + lastIP + "\n\n"))
 		w.Write([]byte(lastResp))
 	})
@@ -104,6 +106,7 @@ func main() {
 			w.WriteHeader(400)
 			log.Error().Str("uri", r.RequestURI).Str("ip", r.RemoteAddr).Err(err).Write()
 
+			w.Write(NAME)
 			w.Write([]byte("URI: " + r.RequestURI + "\nIP:  " + r.RemoteAddr + "\n\n"))
 			w.Write([]byte(strconv.Quote(err.Error())))
 
@@ -112,6 +115,7 @@ func main() {
 			w.WriteHeader(200)
 			log.Info().Str("uri", r.RequestURI).Str("ip", r.RemoteAddr).Write("OK")
 
+			w.Write(NAME)
 			w.Write([]byte("URI: " + r.RequestURI + "\nIP:  " + r.RemoteAddr + "\n\n"))
 			w.Write(out)
 
