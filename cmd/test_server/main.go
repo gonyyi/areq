@@ -12,6 +12,7 @@ import (
 )
 
 var NAME = []byte("aReq.Tester 0.2.0 (github.com/gonyyi/areq)\n\n")
+
 const VERSION = "0.2.0"
 
 func main() {
@@ -24,9 +25,9 @@ func main() {
 	var toIgnore string
 	var logFile string
 	var verbose bool
-	flag.StringVar(&addr, "addr", ":8080", "addr to serve (eg. :8080)")
+	flag.StringVar(&addr, "addr", ":80", "addr to serve (eg. :8080)")
 	flag.StringVar(&respUri, "res", "res", "response URI")
-	flag.StringVar(&toIgnore, "ignore", "/abc.ico", "comma delimited URI to be ignored")
+	flag.StringVar(&toIgnore, "ignore", "/favicon.ico", "comma delimited URI to be ignored")
 	flag.StringVar(&logFile, "log", "", "log file name if to store a log into a file")
 	flag.BoolVar(&verbose, "verbose", false, "verbose log")
 	flag.Parse()
@@ -75,6 +76,7 @@ func main() {
 	//
 	// STORE MOST RECENT RESULT
 	//
+	var lastHost string
 	var lastURI string
 	var lastIP string
 	var lastResp string
@@ -85,38 +87,39 @@ func main() {
 	http.HandleFunc(respUri, func(w http.ResponseWriter, r *http.Request) {
 		// For response page, if to be ignored, just not writing it to a log.
 		if !shouldIgnore(r) {
-			log.Info().Str("ip", r.RemoteAddr).Str("uri", r.RequestURI).Write()
+			log.Info().Str("host", r.Host).Str("ip", r.RemoteAddr).Str("uri", r.RequestURI).Write()
 		}
 		w.WriteHeader(200)
 		w.Write(NAME)
-		w.Write([]byte("URI: " + lastURI + "\nIP:  " + lastIP + "\n\n"))
+		w.Write([]byte("Host: " + lastHost + "\nURI:  " + lastURI + "\nIP:   " + lastIP + "\n\n--- Last Response ---\n\n\n"))
 		w.Write([]byte(lastResp))
 	})
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if shouldIgnore(r) {
-			log.Trace().Str("uri", r.RequestURI).Str("ip", r.RemoteAddr).Write("IGNORED")
+			log.Trace().Str("host", r.Host).Str("uri", r.RequestURI).Str("ip", r.RemoteAddr).Write("IGNORED")
 			return
 		}
+		lastHost = r.Host
 		lastURI = r.RequestURI
 		lastIP = r.RemoteAddr
 
 		out, err := httputil.DumpRequest(r, false)
 		if err != nil {
 			w.WriteHeader(400)
-			log.Error().Str("uri", r.RequestURI).Str("ip", r.RemoteAddr).Err(err).Write()
+			log.Error().Str("host", r.Host).Str("uri", r.RequestURI).Str("ip", r.RemoteAddr).Err(err).Write()
 
 			w.Write(NAME)
-			w.Write([]byte("URI: " + r.RequestURI + "\nIP:  " + r.RemoteAddr + "\n\n"))
+			w.Write([]byte("HOST: " + r.Host + "\nURI:  " + r.RequestURI + "\nIP:   " + r.RemoteAddr + "\n\n"))
 			w.Write([]byte(strconv.Quote(err.Error())))
 
 			lastResp = err.Error()
 		} else {
 			w.WriteHeader(200)
-			log.Info().Str("uri", r.RequestURI).Str("ip", r.RemoteAddr).Write("OK")
+			log.Info().Str("host", r.Host).Str("uri", r.RequestURI).Str("ip", r.RemoteAddr).Write("OK")
 
 			w.Write(NAME)
-			w.Write([]byte("URI: " + r.RequestURI + "\nIP:  " + r.RemoteAddr + "\n\n"))
+			w.Write([]byte("HOST: " + r.Host + "\nURI:  " + r.RequestURI + "\nIP:   " + r.RemoteAddr + "\n\n"))
 			w.Write(out)
 
 			lastResp = string(out)
