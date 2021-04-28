@@ -15,6 +15,8 @@ var NAME = []byte("aReq.Tester 0.2.0 (github.com/gonyyi/areq)\n\n")
 
 const VERSION = "0.2.0"
 
+// Crosscompile for Pi: `GOARCH=arm GOARM=5 GOOS=linux go build -o httpTestArm5`
+
 func main() {
 
 	//
@@ -91,7 +93,7 @@ func main() {
 		}
 		w.WriteHeader(200)
 		w.Write(NAME)
-		w.Write([]byte("Host: " + lastHost + "\nURI:  " + lastURI + "\nIP:   " + lastIP + "\n\n--- Last Response ---\n\n\n"))
+		w.Write([]byte("HOST: " + lastHost + "\nURI:  " + lastURI + "\nIP:   " + lastIP + "\n\n--- Last Response ---\n\n\n"))
 		w.Write([]byte(lastResp))
 	})
 
