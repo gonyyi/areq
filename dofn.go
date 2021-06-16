@@ -4,10 +4,13 @@
 package areq
 
 import (
+	"bytes"
 	"compress/gzip"
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 type DoFn struct {
@@ -68,6 +71,25 @@ func (dofns) AddCookies(cookies []*http.Cookie) *DoFn {
 func (dofns) ReqFunc(f func(r *http.Request) error) *DoFn {
 	return &DoFn{
 		Req: f,
+	}
+}
+
+
+func (dofns) ReqBodyStr(body string) *DoFn {
+	return &DoFn{
+		Req: func(r *http.Request) error {
+			r.Body = ioutil.NopCloser(strings.NewReader(body))
+			return nil
+		},
+	}
+}
+
+func (dofns) ReqBody(body []byte) *DoFn {
+	return &DoFn{
+		Req: func(r *http.Request) error {
+			r.Body = ioutil.NopCloser(bytes.NewReader(body))
+			return nil
+		},
 	}
 }
 
