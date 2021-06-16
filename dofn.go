@@ -26,6 +26,49 @@ func DoIf(condition bool, do *DoFn) *DoFn {
 	return nil
 }
 
+func DoJoin(do ...*DoFn) *DoFn {
+	dofn := DoFn{}
+	var req []func(*http.Request) error
+	var cli []func(cli *http.Client) error
+	var res []func(r *http.Response) error
+	for _, f := range do {
+		if f.Req != nil {
+			req = append(req, f.Req)
+		}
+		if f.Cli != nil {
+			cli = append(cli, f.Cli)
+		}
+		if f.Res != nil {
+			res = append(res, f.Res)
+		}
+	}
+	dofn.Req = func(r *http.Request)error {
+		for _, f := range req {
+			if err:=f(r); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	dofn.Cli = func(c *http.Client)error {
+		for _, f := range cli {
+			if err:=f(c); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	dofn.Res = func(r *http.Response)error {
+		for _, f := range res {
+			if err:=f(r); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	return &dofn
+}
+
 var Do dofns
 
 type dofns struct{}
