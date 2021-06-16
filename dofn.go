@@ -14,6 +14,7 @@ import (
 )
 
 type DoFn struct {
+	Name string
 	Req func(*http.Request) error
 	Cli func(cli *http.Client) error
 	Res func(r *http.Response) error
@@ -27,11 +28,17 @@ func DoIf(condition bool, do *DoFn) *DoFn {
 }
 
 func DoJoin(do ...*DoFn) *DoFn {
-	dofn := DoFn{}
+	var dofn DoFn
+	var dofnNames []string
 	var req []func(*http.Request) error
 	var cli []func(cli *http.Client) error
 	var res []func(r *http.Response) error
 	for _, f := range do {
+		if f.Name != "" {
+			dofnNames = append(dofnNames, f.Name)
+		} else {
+			dofnNames = append(dofnNames, "NONAME-DOFN")
+		}
 		if f.Req != nil {
 			req = append(req, f.Req)
 		}
@@ -66,6 +73,7 @@ func DoJoin(do ...*DoFn) *DoFn {
 		}
 		return nil
 	}
+	dofn.Name = "DoJoin(" + strings.Join(dofnNames, ",") + ")"
 	return &dofn
 }
 
@@ -75,6 +83,7 @@ type dofns struct{}
 
 func (dofns) AuthBasic(id, pwd string) *DoFn {
 	return &DoFn{
+		Name: "AuthBasic",
 		Req: func(req *http.Request) error {
 			req.SetBasicAuth(id, pwd)
 			return nil
@@ -84,6 +93,7 @@ func (dofns) AuthBasic(id, pwd string) *DoFn {
 
 func (dofns) UseCookieJar(jar http.CookieJar) *DoFn {
 	return &DoFn{
+		Name: "UseCookieJar",
 		Cli: func(cli *http.Client) error {
 			cli.Jar = jar
 			return nil
@@ -93,6 +103,7 @@ func (dofns) UseCookieJar(jar http.CookieJar) *DoFn {
 
 func (dofns) AddCookie(k, v string) *DoFn {
 	return &DoFn{
+		Name: "AddCookie",
 		Req: func(req *http.Request) error {
 			req.AddCookie(&http.Cookie{Name: k, Value: v})
 			return nil
@@ -102,6 +113,7 @@ func (dofns) AddCookie(k, v string) *DoFn {
 
 func (dofns) AddCookies(cookies []*http.Cookie) *DoFn {
 	return &DoFn{
+		Name: "AddCookies",
 		Req: func(req *http.Request) error {
 			for i := 0; i < len(cookies); i++ {
 				req.AddCookie(cookies[i])
@@ -113,6 +125,7 @@ func (dofns) AddCookies(cookies []*http.Cookie) *DoFn {
 
 func (dofns) ReqFunc(f func(r *http.Request) error) *DoFn {
 	return &DoFn{
+		Name: "ReqFunc",
 		Req: f,
 	}
 }
@@ -120,6 +133,7 @@ func (dofns) ReqFunc(f func(r *http.Request) error) *DoFn {
 
 func (dofns) ReqBodyStr(body string) *DoFn {
 	return &DoFn{
+		Name: "ReqBodyStr",
 		Req: func(r *http.Request) error {
 			r.Body = ioutil.NopCloser(strings.NewReader(body))
 			return nil
@@ -130,6 +144,7 @@ func (dofns) ReqBodyStr(body string) *DoFn {
 
 func (dofns) ReqBody(body io.Reader) *DoFn {
 	return &DoFn{
+		Name: "ReqBody",
 		Req: func(r *http.Request) error {
 			r.Body = ioutil.NopCloser(body)
 			return nil
@@ -139,6 +154,7 @@ func (dofns) ReqBody(body io.Reader) *DoFn {
 
 func (dofns) ReqBodyBytes(body []byte) *DoFn {
 	return &DoFn{
+		Name: "ReqBodyBytes",
 		Req: func(r *http.Request) error {
 			r.Body = ioutil.NopCloser(bytes.NewReader(body))
 			return nil
@@ -148,6 +164,7 @@ func (dofns) ReqBodyBytes(body []byte) *DoFn {
 
 func (dofns) ReqHeader(h http.Header) *DoFn {
 	return &DoFn{
+		Name: "ReqHeader",
 		Req: func(r *http.Request) error {
 			r.Header = h
 			return nil
@@ -157,6 +174,7 @@ func (dofns) ReqHeader(h http.Header) *DoFn {
 
 func (dofns) ReqHeaderAdd(k, v string) *DoFn {
 	return &DoFn{
+		Name: "ReqHeaderAdd",
 		Req: func(r *http.Request) error {
 			r.Header.Add(k, v)
 			return nil
@@ -166,6 +184,7 @@ func (dofns) ReqHeaderAdd(k, v string) *DoFn {
 
 func (dofns) ReqHeaderSet(k, v string) *DoFn {
 	return &DoFn{
+		Name: "ReqHeaderSet",
 		Req: func(r *http.Request) error {
 			r.Header.Set(k, v)
 			return nil
@@ -175,12 +194,14 @@ func (dofns) ReqHeaderSet(k, v string) *DoFn {
 
 func (dofns) ResFunc(f func(*http.Response) error) *DoFn {
 	return &DoFn{
+		Name: "ResFunc",
 		Res: f,
 	}
 }
 
 func (dofns) GetCookie(name string, dst *string) *DoFn {
 	return &DoFn{
+		Name: "GetCookie",
 		Res: func(r *http.Response) error {
 			for _, v := range r.Cookies() {
 				if v.Name == name {
@@ -194,6 +215,7 @@ func (dofns) GetCookie(name string, dst *string) *DoFn {
 
 func (dofns) GetCookies(dst []*http.Cookie) *DoFn {
 	return &DoFn{
+		Name: "GetCookies",
 		Res: func(r *http.Response) error {
 			dst = r.Cookies()
 			return nil
@@ -203,6 +225,7 @@ func (dofns) GetCookies(dst []*http.Cookie) *DoFn {
 
 func (dofns) ResJSONTo(dst interface{}) *DoFn {
 	return &DoFn{
+		Name: "ResJSONTo",
 		Res: func(res *http.Response) error {
 			var dec *json.Decoder
 			switch res.Header.Get("Content-Encoding") {
@@ -231,6 +254,7 @@ func (dofns) ResJSONTo(dst interface{}) *DoFn {
 
 func (dofns) ResTo(dst io.Writer) *DoFn {
 	return &DoFn{
+		Name: "ResTo",
 		Res: func(res *http.Response) error {
 			_, err := io.Copy(dst, res.Body)
 			return err
@@ -240,6 +264,7 @@ func (dofns) ResTo(dst io.Writer) *DoFn {
 
 func (dofns) ResGzipTo(dst io.Writer) *DoFn {
 	return &DoFn{
+		Name: "ResGzipTo",
 		Req: func(req *http.Request) error {
 			req.Header.Add("Accept-Encoding", "gzip")
 			return nil
