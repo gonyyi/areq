@@ -1,12 +1,28 @@
 package areq_test
 
-import "testing"
+import (
+	"bytes"
+	"github.com/gonyyi/areq"
+	"strings"
+	"testing"
+)
+
+func TestRequest_ReqBodyBytes(t *testing.T) {
+	b := "hello world"
+	out := bytes.Buffer{}
+	// var out []byte
+	err := areq.Req("POST", "https://httpbin.org/post", areq.Do.ReqBodyBytes([]byte(b)), areq.Do.ResTo(&out))
+	if err != nil {println(err.Error())}
+	println("ok")
+	println(out.String())
+}
 
 func TestRequest_ReqBody(t *testing.T) {
 	b := "hello world"
 	out := bytes.Buffer{}
 	// var out []byte
-	err := areq.Req("POST", "https://httpbin.org/post", areq.Do.ReqBody([]byte(b)), areq.Do.ResTo(&out))
+	br := strings.NewReader(b)
+	err := areq.Req("POST", "https://httpbin.org/post", areq.Do.ReqBody(br), areq.Do.ResTo(&out))
 	if err != nil {println(err.Error())}
 	println("ok")
 	println(out.String())
