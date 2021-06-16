@@ -33,7 +33,7 @@ func TestRequest_DoJoin(t *testing.T) {
 	out := bytes.Buffer{}
 	// var out []byte
 	br := strings.NewReader(b)
-	dofns := areq.DoJoin( areq.Do.ReqBody(br), areq.Do.ResTo(&out))
+	dofns := areq.Do.Join( areq.Do.ReqBody(br), areq.Do.ResTo(&out))
 	println(dofns.Name)
 	err := areq.Req("POST", "https://httpbin.org/post", dofns)
 	if err != nil {println(err.Error())}
