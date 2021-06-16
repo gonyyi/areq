@@ -27,3 +27,15 @@ func TestRequest_ReqBody(t *testing.T) {
 	println("ok")
 	println(out.String())
 }
+
+func TestRequest_DoJoin(t *testing.T) {
+	b := "hello world"
+	out := bytes.Buffer{}
+	// var out []byte
+	br := strings.NewReader(b)
+	dofns := areq.DoJoin( areq.Do.ReqBody(br), areq.Do.ResTo(&out))
+	err := areq.Req("POST", "https://httpbin.org/post", dofns)
+	if err != nil {println(err.Error())}
+	println("ok")
+	println(out.String())
+}
