@@ -84,7 +84,17 @@ func (dofns) ReqBodyStr(body string) *DoFn {
 	}
 }
 
-func (dofns) ReqBody(body []byte) *DoFn {
+
+func (dofns) ReqBody(body io.Reader) *DoFn {
+	return &DoFn{
+		Req: func(r *http.Request) error {
+			r.Body = ioutil.NopCloser(body)
+			return nil
+		},
+	}
+}
+
+func (dofns) ReqBodyBytes(body []byte) *DoFn {
 	return &DoFn{
 		Req: func(r *http.Request) error {
 			r.Body = ioutil.NopCloser(bytes.NewReader(body))
