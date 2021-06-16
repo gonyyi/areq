@@ -15,19 +15,23 @@ import (
 
 type DoFn struct {
 	Name string
-	Req func(*http.Request) error
-	Cli func(cli *http.Client) error
-	Res func(r *http.Response) error
+	Req  func(*http.Request) error
+	Cli  func(cli *http.Client) error
+	Res  func(r *http.Response) error
 }
 
-func DoIf(condition bool, do *DoFn) *DoFn {
+var Do dofns
+
+type dofns struct{}
+
+func (dofns) If(condition bool, do *DoFn) *DoFn {
 	if condition {
 		return do
 	}
 	return nil
 }
 
-func DoJoin(do ...*DoFn) *DoFn {
+func (dofns) Join(do ...*DoFn) *DoFn {
 	var dofn DoFn
 	var dofnNames []string
 	var req []func(*http.Request) error
@@ -49,25 +53,25 @@ func DoJoin(do ...*DoFn) *DoFn {
 			res = append(res, f.Res)
 		}
 	}
-	dofn.Req = func(r *http.Request)error {
+	dofn.Req = func(r *http.Request) error {
 		for _, f := range req {
-			if err:=f(r); err != nil {
+			if err := f(r); err != nil {
 				return err
 			}
 		}
 		return nil
 	}
-	dofn.Cli = func(c *http.Client)error {
+	dofn.Cli = func(c *http.Client) error {
 		for _, f := range cli {
-			if err:=f(c); err != nil {
+			if err := f(c); err != nil {
 				return err
 			}
 		}
 		return nil
 	}
-	dofn.Res = func(r *http.Response)error {
+	dofn.Res = func(r *http.Response) error {
 		for _, f := range res {
-			if err:=f(r); err != nil {
+			if err := f(r); err != nil {
 				return err
 			}
 		}
@@ -76,10 +80,6 @@ func DoJoin(do ...*DoFn) *DoFn {
 	dofn.Name = "DoJoin(" + strings.Join(dofnNames, ",") + ")"
 	return &dofn
 }
-
-var Do dofns
-
-type dofns struct{}
 
 func (dofns) AuthBasic(id, pwd string) *DoFn {
 	return &DoFn{
@@ -126,10 +126,9 @@ func (dofns) AddCookies(cookies []*http.Cookie) *DoFn {
 func (dofns) ReqFunc(f func(r *http.Request) error) *DoFn {
 	return &DoFn{
 		Name: "ReqFunc",
-		Req: f,
+		Req:  f,
 	}
 }
-
 
 func (dofns) ReqBodyStr(body string) *DoFn {
 	return &DoFn{
@@ -140,7 +139,6 @@ func (dofns) ReqBodyStr(body string) *DoFn {
 		},
 	}
 }
-
 
 func (dofns) ReqBody(body io.Reader) *DoFn {
 	return &DoFn{
@@ -195,7 +193,7 @@ func (dofns) ReqHeaderSet(k, v string) *DoFn {
 func (dofns) ResFunc(f func(*http.Response) error) *DoFn {
 	return &DoFn{
 		Name: "ResFunc",
-		Res: f,
+		Res:  f,
 	}
 }
 
