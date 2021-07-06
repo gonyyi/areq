@@ -91,6 +91,16 @@ func (dofns) AuthBasic(id, pwd string) *DoFn {
 	}
 }
 
+func (dofns) SetClientTimeout(duration time.Duration) *DoFn {
+	return &DoFn{
+		Name: "SetClientTimeout="+duration.String(),
+		Cli: func(cli *http.Client) error {
+			cli.Timeout = duration
+			return nil
+		},
+	}
+}
+
 func (dofns) UseCookieJar(jar http.CookieJar) *DoFn {
 	return &DoFn{
 		Name: "UseCookieJar",
