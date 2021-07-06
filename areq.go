@@ -19,6 +19,13 @@ type Request struct {
 	Transport *http.Transport
 }
 
+func (r *Request) SetDialTimeout(timeout, keepAlive time.Duration) {
+	r.Transport.DialContext = (&net.Dialer{
+		Timeout:   timeout,
+		KeepAlive: keepAlive,
+	}).DialContext
+}
+
 func NewRequest() *Request {
 	r := Request{}
 	r.Transport = &http.Transport{
@@ -26,7 +33,7 @@ func NewRequest() *Request {
 			InsecureSkipVerify: true,
 		},
 		DialContext: (&net.Dialer{
-			Timeout:   2 * time.Second,
+			Timeout:   1 * time.Second,
 			KeepAlive: 600 * time.Second,
 		}).DialContext,
 		// ForceAttemptHTTP2:     true,
