@@ -33,7 +33,7 @@ func NewRequest() *Request {
 			InsecureSkipVerify: true,
 		},
 		DialContext: (&net.Dialer{
-			Timeout:   1 * time.Second,
+			Timeout:   5 * time.Second,
 			KeepAlive: 600 * time.Second,
 		}).DialContext,
 		// ForceAttemptHTTP2:     true,
