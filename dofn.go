@@ -11,7 +11,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 )
+
 
 type DoFn struct {
 	Name string
