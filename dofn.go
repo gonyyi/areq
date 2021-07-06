@@ -14,7 +14,6 @@ import (
 	"time"
 )
 
-
 type DoFn struct {
 	Name string
 	Req  func(*http.Request) error
