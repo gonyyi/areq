@@ -1,5 +1,6 @@
 // (c) 2021 Gon Y Yi. 
 // https://gonyyi.com
+// 07/14/21 Wed 17:00
 
 package areq
 
@@ -13,11 +14,7 @@ import (
 )
 
 const (
-	VERSION                 = "areq/0.2.2"
-	DefaultDialTimeout      = 5 * time.Second
-	DefaultDialKeepAlive    = 600 * time.Second
-	DefaultHandshakeTimeout = 5 * time.Second
-	DefaultClientTimeout    = 10 * time.Second
+	VERSION = "areq/0.2.2"
 )
 
 type Request struct {
@@ -28,40 +25,40 @@ type Request struct {
 func (r Request) Init() Request {
 	r.Transport = &http.Transport{
 		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
+			InsecureSkipVerify: DefaultSetting.TLSInsecureSkipVerify,
 		},
 		DialContext: (&net.Dialer{
-			Timeout:   DefaultDialTimeout,
-			KeepAlive: DefaultDialKeepAlive,
+			Timeout:   DefaultSetting.DialTimeout,
+			KeepAlive: DefaultSetting.DialKeepAlive,
 		}).DialContext,
-		// ForceAttemptHTTP2:     true,
-		TLSHandshakeTimeout: DefaultHandshakeTimeout,
-		DisableKeepAlives:   false,
-		MaxIdleConns:        100,
-		MaxIdleConnsPerHost: 100,
+		ForceAttemptHTTP2:   DefaultSetting.ForceAttemptHTTP2,
+		TLSHandshakeTimeout: DefaultSetting.HandshakeTimeout,
+		DisableKeepAlives:   DefaultSetting.DisableKeepAlives,
+		MaxIdleConns:        DefaultSetting.MaxIdleConns,
+		MaxIdleConnsPerHost: DefaultSetting.MaxIdleConnsPerHost,
 	}
 	r.Client = &http.Client{
-		Timeout:   DefaultClientTimeout,
+		Timeout:   DefaultSetting.ClientTimeout,
 		Transport: r.Transport,
 	}
 	return r
 }
 
 // SetTimeout will set various timeout setting of request.
-// If set to -1, it will use default value.
-// If set to 0, it means timeout will not be used.
+// If set to 0, it will use default value.
+// If set to -1, it means timeout will not be used.
 func (r Request) SetTimeout(dialTimeout, dialKeepAlive, handshakeTimeout, clientTimeout time.Duration) Request {
-	if dialTimeout == -1 {
-		dialTimeout = DefaultDialTimeout
+	if dialTimeout == 0 {
+		dialTimeout = DefaultSetting.DialTimeout
 	}
-	if dialKeepAlive == -1 {
-		dialKeepAlive = DefaultDialKeepAlive
+	if dialKeepAlive == 0 {
+		dialKeepAlive = DefaultSetting.DialKeepAlive
 	}
-	if handshakeTimeout == -1 {
-		handshakeTimeout = DefaultHandshakeTimeout
+	if handshakeTimeout == 0 {
+		handshakeTimeout = DefaultSetting.HandshakeTimeout
 	}
-	if clientTimeout == -1 {
-		clientTimeout = DefaultClientTimeout
+	if clientTimeout == 0 {
+		clientTimeout = DefaultSetting.ClientTimeout
 	}
 
 	if r.Transport == nil || r.Client == nil {
@@ -73,7 +70,6 @@ func (r Request) SetTimeout(dialTimeout, dialKeepAlive, handshakeTimeout, client
 		KeepAlive: dialKeepAlive,
 	}).DialContext
 	r.Transport.TLSHandshakeTimeout = handshakeTimeout
-
 	r.Client.Timeout = clientTimeout
 
 	return r
