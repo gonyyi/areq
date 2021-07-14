@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	VERSION = "areq/0.2.2"
+	VERSION = "areq/0.2.3"
 )
 
 type Request struct {
