@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"os"
 	"sync"
 )
 
@@ -53,7 +52,8 @@ func (j *CookieJar) Save() ([]byte, error) {
 }
 
 func (j *CookieJar) LoadFile(filename string) error {
-	r, err := os.ReadFile(filename)
+	r, err := ioutil.ReadFile(filename)
+	// r, err := os.ReadFile(filename) // TODO: old Go version will not able to handle this.
 	if err != nil {
 		return err
 	}
