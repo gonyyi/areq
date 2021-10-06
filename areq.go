@@ -31,7 +31,7 @@ func (r Request) Init() Request {
 			Timeout:   DefaultSetting.DialTimeout,
 			KeepAlive: DefaultSetting.DialKeepAlive,
 		}).DialContext,
-		ForceAttemptHTTP2:   DefaultSetting.ForceAttemptHTTP2,
+		// ForceAttemptHTTP2:   DefaultSetting.ForceAttemptHTTP2, // TODO: this causes issue with older Go version.
 		TLSHandshakeTimeout: DefaultSetting.HandshakeTimeout,
 		DisableKeepAlives:   DefaultSetting.DisableKeepAlives,
 		MaxIdleConns:        DefaultSetting.MaxIdleConns,
